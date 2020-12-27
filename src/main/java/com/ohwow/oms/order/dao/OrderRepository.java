@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import com.ohwow.oms.order.OrderStatusEnum;
 import com.ohwow.oms.order.domain.Order;
 
 @Repository
@@ -18,4 +19,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 	List<Order> findAllByDateTimeCreatedBetween(LocalDateTime dateTimeCreatedStart, LocalDateTime dateTimeCreatedEnd);
 
 	List<Order> findAllByDateTimeCompletedBetween(LocalDateTime dateCompletedStart, LocalDateTime dateTimeCompletedEnd);
+
+	List<Order> findByHasStockIssuesTrue();
+
+	List<Order> findAllByOrderStatus(OrderStatusEnum orderStatusEnum);
 }

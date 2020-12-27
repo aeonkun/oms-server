@@ -1,7 +1,6 @@
 package com.ohwow.oms.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,9 +12,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ohwow.oms.inventory.exception.InventoryException;
-import com.ohwow.oms.order.OrderStatusEnum;
 import com.ohwow.oms.order.dto.OrderDto;
 import com.ohwow.oms.order.dto.OrderResponseDto;
+import com.ohwow.oms.order.dto.UpdateOrderStatusDto;
 import com.ohwow.oms.order.exception.OrderException;
 import com.ohwow.oms.order.service.OrderService;
 import com.ohwow.oms.products.exception.ProductException;
@@ -30,8 +29,7 @@ public class OrderController {
 
 	@GetMapping
 	public OrderResponseDto getAllOrders(@RequestParam int page, @RequestParam int rows) {
-
-		return orderService.getAllOrdersTest(page, rows);
+		return orderService.getAllOrders(page, rows);
 	}
 
 	@GetMapping("/{id}")
@@ -47,10 +45,13 @@ public class OrderController {
 	}
 
 	@PutMapping("/{id}/status")
-	public boolean updateOrderStatus(@PathVariable long id, @RequestBody OrderStatusEnum orderStatus,
-			Authentication authentication) throws InventoryException, ProductException {
+	public boolean updateOrderStatus(@PathVariable long id, @RequestBody UpdateOrderStatusDto updateOrderStatus)
+			throws InventoryException, ProductException {
+		System.out.println("update");
+		System.out.println(updateOrderStatus.getUsername());
+		System.out.println(updateOrderStatus.getOrderStatus());
 
-		return orderService.updateOrderStatus(id, orderStatus, authentication.getName());
+		return orderService.updateOrderStatus(id, updateOrderStatus);
 	}
 
 }

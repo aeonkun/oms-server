@@ -8,7 +8,8 @@ public class ProductTransactionDto {
 
 	private final LocalDateTime dateTimeCreated;
 	private final long orderId;
-	private final String customerName;
+	private final String customerfirstName;
+	private final String customerlastName;
 	private final int quantity;
 	private final long price;
 	private final long total;
@@ -18,7 +19,8 @@ public class ProductTransactionDto {
 			int quantity, long price, long total, OrderStatusEnum status) {
 		this.dateTimeCreated = dateTimeCreated;
 		this.orderId = orderId;
-		this.customerName = firstName + " " + lastName;
+		this.customerfirstName = firstName;
+		this.customerlastName = lastName;
 		this.quantity = quantity;
 		this.price = price;
 		this.total = total;
@@ -49,15 +51,20 @@ public class ProductTransactionDto {
 		return status;
 	}
 
-	public String getCustomerName() {
-		return customerName;
+	public String getCustomerfirstName() {
+		return customerfirstName;
+	}
+
+	public String getCustomerlastName() {
+		return customerlastName;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((customerName == null) ? 0 : customerName.hashCode());
+		result = prime * result + ((customerfirstName == null) ? 0 : customerfirstName.hashCode());
+		result = prime * result + ((customerlastName == null) ? 0 : customerlastName.hashCode());
 		result = prime * result + ((dateTimeCreated == null) ? 0 : dateTimeCreated.hashCode());
 		result = prime * result + (int) (orderId ^ (orderId >>> 32));
 		result = prime * result + (int) (price ^ (price >>> 32));
@@ -76,10 +83,15 @@ public class ProductTransactionDto {
 		if (getClass() != obj.getClass())
 			return false;
 		ProductTransactionDto other = (ProductTransactionDto) obj;
-		if (customerName == null) {
-			if (other.customerName != null)
+		if (customerfirstName == null) {
+			if (other.customerfirstName != null)
 				return false;
-		} else if (!customerName.equals(other.customerName))
+		} else if (!customerfirstName.equals(other.customerfirstName))
+			return false;
+		if (customerlastName == null) {
+			if (other.customerlastName != null)
+				return false;
+		} else if (!customerlastName.equals(other.customerlastName))
 			return false;
 		if (dateTimeCreated == null) {
 			if (other.dateTimeCreated != null)

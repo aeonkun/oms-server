@@ -4,22 +4,22 @@ import com.ohwow.oms.orderdetails.domain.OrderDetail;
 
 public class OrderDetailDto {
 
-	private long productId;
-	private String productName;
-	private int quantity;
-	private long price;
-	private long total;
+	private final long productId;
+	private final String productName;
+	private final int quantity;
+	private final long price;
+	private final long total;
+	private final boolean hasEnoughStock;
 
-	public OrderDetailDto() {
-
-	}
-
-	public OrderDetailDto(long productId, String productName, int quantity, long price, long total) {
+	public OrderDetailDto(long productId, String productName, int quantity, long price, long total,
+			boolean hasEnoughStock) {
 		this.productId = productId;
 		this.productName = productName;
 		this.quantity = quantity;
 		this.price = price;
 		this.total = total;
+		this.hasEnoughStock = hasEnoughStock;
+
 	}
 
 	public OrderDetailDto(OrderDetail orderDetail) {
@@ -28,52 +28,39 @@ public class OrderDetailDto {
 		this.quantity = orderDetail.getQuantity();
 		this.price = orderDetail.getProduct().getPrice();
 		this.total = orderDetail.getTotal();
+		this.hasEnoughStock = orderDetail.hasEnoughStock();
+
 	}
 
 	public long getProductId() {
 		return productId;
 	}
 
-	public void setProductId(long productId) {
-		this.productId = productId;
-	}
-
 	public String getProductName() {
 		return productName;
-	}
-
-	public void setProductName(String productName) {
-		this.productName = productName;
 	}
 
 	public int getQuantity() {
 		return quantity;
 	}
 
-	public void setQuantity(int quantity) {
-		this.quantity = quantity;
-	}
-
 	public long getTotal() {
 		return total;
-	}
-
-	public void setTotal(long total) {
-		this.total = total;
 	}
 
 	public long getPrice() {
 		return price;
 	}
 
-	public void setPrice(long price) {
-		this.price = price;
+	public boolean getHasEnoughStock() {
+		return hasEnoughStock;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + (hasEnoughStock ? 1231 : 1237);
 		result = prime * result + (int) (price ^ (price >>> 32));
 		result = prime * result + (int) (productId ^ (productId >>> 32));
 		result = prime * result + ((productName == null) ? 0 : productName.hashCode());
@@ -91,6 +78,8 @@ public class OrderDetailDto {
 		if (getClass() != obj.getClass())
 			return false;
 		OrderDetailDto other = (OrderDetailDto) obj;
+		if (hasEnoughStock != other.hasEnoughStock)
+			return false;
 		if (price != other.price)
 			return false;
 		if (productId != other.productId)
@@ -105,6 +94,12 @@ public class OrderDetailDto {
 		if (total != other.total)
 			return false;
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "OrderDetailDto [productId=" + productId + ", productName=" + productName + ", quantity=" + quantity
+				+ ", price=" + price + ", total=" + total + ", hasEnoughStock=" + hasEnoughStock + "]";
 	}
 
 }

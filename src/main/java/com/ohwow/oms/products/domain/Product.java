@@ -6,11 +6,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import com.ohwow.oms.inventory.domain.Inventory;
 import com.ohwow.oms.products.dto.ProductDto;
 
 @Entity
@@ -26,23 +23,23 @@ public final class Product {
 	private LocalDateTime dateTimeCreated;
 	private String modifiedBy;
 	private LocalDateTime dateTimeModified;
-
-	@OneToOne
-	@JoinColumn(name = "product_id")
-	private Inventory inventory;
+	private boolean active;
+	private long parentId;
 
 	public Product() {
 		// Default constructor
 	}
 
 	public Product(String itemName, long price, String createdBy, LocalDateTime dateTimeCreated, String modifiedBy,
-			LocalDateTime dateTimeModified) {
+			LocalDateTime dateTimeModified, boolean active, long parentId) {
 		this.itemName = itemName;
 		this.price = price;
 		this.createdBy = createdBy;
 		this.dateTimeCreated = dateTimeCreated;
 		this.modifiedBy = modifiedBy;
 		this.dateTimeModified = dateTimeModified;
+		this.active = active;
+		this.parentId = parentId;
 	}
 
 	public Product(ProductDto product) {
@@ -108,6 +105,22 @@ public final class Product {
 
 	public void setDateTimeModified(LocalDateTime dateTimeModified) {
 		this.dateTimeModified = dateTimeModified;
+	}
+
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+
+	public long getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(long parentId) {
+		this.parentId = parentId;
 	}
 
 }

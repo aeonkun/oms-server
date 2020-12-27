@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ohwow.oms.analytics.dto.OrderActivityDto;
+import com.ohwow.oms.analytics.dto.ProductSalesDto;
 import com.ohwow.oms.analytics.dto.SalesActivitySummaryDto;
 import com.ohwow.oms.analytics.service.AnalyticsService;
 import com.ohwow.oms.commons.exceptions.InvalidTimeUnitException;
@@ -33,5 +34,10 @@ public class AnalyticsController {
 	public SalesActivitySummaryDto getSalesActivitySummary(@RequestParam TimeUnitEnum timeUnit)
 			throws InvalidTimeUnitException {
 		return analyticsService.getSalesActivitySummaryByDateRange(timeUnit);
+	}
+
+	@GetMapping("/productsales")
+	public List<ProductSalesDto> getProductSales(@RequestParam TimeUnitEnum timeUnit) throws InvalidTimeUnitException {
+		return analyticsService.getProductSalesByCompletedDate(timeUnit);
 	}
 }

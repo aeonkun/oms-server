@@ -3,6 +3,7 @@ package com.ohwow.oms.statushistory.dto;
 import java.time.LocalDateTime;
 
 import com.ohwow.oms.order.OrderStatusEnum;
+import com.ohwow.oms.statushistory.domain.StatusHistory;
 
 public class StatusHistoryDto {
 
@@ -19,6 +20,14 @@ public class StatusHistoryDto {
 		this.newStatus = newStatus;
 		this.modifiedBy = modifiedBy;
 		this.dateTimeModified = dateTimeModified;
+	}
+
+	public StatusHistoryDto(StatusHistory statusHistory) {
+		this.orderId = statusHistory.getOrder().getId();
+		this.oldStatus = statusHistory.getOldStatus();
+		this.newStatus = statusHistory.getNewStatus();
+		this.modifiedBy = statusHistory.getModifiedBy();
+		this.dateTimeModified = statusHistory.getDateTimeModified();
 	}
 
 	public long getOrderId() {

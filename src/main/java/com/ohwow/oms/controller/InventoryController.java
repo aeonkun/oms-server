@@ -18,6 +18,7 @@ import com.ohwow.oms.inventory.service.InventoryService;
 import com.ohwow.oms.inventoryadjustmenthistory.dto.InventoryAdjustmentDto;
 import com.ohwow.oms.inventoryadjustmenthistory.dto.InventoryAdjustmentHistoryResponse;
 import com.ohwow.oms.inventoryadjustmenthistory.service.InventoryAdjustmentHistoryService;
+import com.ohwow.oms.products.exception.ProductException;
 
 @RestController
 @RequestMapping(path = "api/v1")
@@ -42,7 +43,7 @@ public class InventoryController {
 
 	@PostMapping("/inventories/{id}/adjustments/create")
 	public boolean adjustInventory(@PathVariable long id, @RequestBody InventoryAdjustmentDto inventoryAdjustmentDto)
-			throws InventoryException {
+			throws InventoryException, ProductException {
 		return inventoryService.updateInventory(id, inventoryAdjustmentDto);
 	}
 

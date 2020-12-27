@@ -6,6 +6,7 @@ import java.util.List;
 import com.ohwow.oms.customer.dto.CustomerDto;
 import com.ohwow.oms.order.OrderStatusEnum;
 import com.ohwow.oms.orderdetails.dto.OrderDetailDto;
+import com.ohwow.oms.statushistory.dto.StatusHistoryDto;
 
 public class OrderDto {
 
@@ -18,12 +19,15 @@ public class OrderDto {
 	private final long totalPrice;
 	private final OrderStatusEnum orderStatus;
 	private final List<OrderDetailDto> orderDetails;
+	private final List<StatusHistoryDto> statusHistories;
 	private final String paymentMethod;
 	private final String additionalNotes;
+	private final boolean hasStockIssues;
 
 	public OrderDto(long id, CustomerDto customer, String createdBy, LocalDateTime dateTimeCreated, String modifiedBy,
 			LocalDateTime dateTimeModified, long totalPrice, OrderStatusEnum orderStatus,
-			List<OrderDetailDto> orderDetails, String paymentMethod, String additionalNotes) {
+			List<OrderDetailDto> orderDetails, List<StatusHistoryDto> statusHistories, String paymentMethod,
+			String additionalNotes, boolean hasStockIssues) {
 		this.id = id;
 		this.customer = customer;
 		this.createdBy = createdBy;
@@ -33,21 +37,11 @@ public class OrderDto {
 		this.totalPrice = totalPrice;
 		this.orderStatus = orderStatus;
 		this.orderDetails = orderDetails;
+		this.statusHistories = statusHistories;
 		this.paymentMethod = paymentMethod;
 		this.additionalNotes = additionalNotes;
+		this.hasStockIssues = hasStockIssues;
 	}
-
-//	public OrderDto(Order order, List<OrderDetailDto> orderDetails) {
-//		this.id = !ObjectUtils.isEmpty(order) ? order.getId() : 0;
-//		this.customer = new CustomerDto(order.getCustomer());
-//		this.createdBy = order.getCreatedBy();
-//		this.dateTimeCreated = order.getDateTimeCreated();
-//		this.modifiedBy = order.getModifiedBy();
-//		this.dateTimeModified = order.getDateTimeModified();
-//		this.totalPrice = order.getTotalPrice();
-//		this.orderStatus = order.getOrderStatus();
-//		this.orderDetails = orderDetails;
-//	}
 
 	public long getId() {
 		return id;
@@ -93,6 +87,14 @@ public class OrderDto {
 		return additionalNotes;
 	}
 
+	public List<StatusHistoryDto> getStatusHistories() {
+		return statusHistories;
+	}
+
+	public boolean isHasStockIssues() {
+		return hasStockIssues;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -102,11 +104,13 @@ public class OrderDto {
 		result = prime * result + ((customer == null) ? 0 : customer.hashCode());
 		result = prime * result + ((dateTimeCreated == null) ? 0 : dateTimeCreated.hashCode());
 		result = prime * result + ((dateTimeModified == null) ? 0 : dateTimeModified.hashCode());
+		result = prime * result + (hasStockIssues ? 1231 : 1237);
 		result = prime * result + (int) (id ^ (id >>> 32));
 		result = prime * result + ((modifiedBy == null) ? 0 : modifiedBy.hashCode());
 		result = prime * result + ((orderDetails == null) ? 0 : orderDetails.hashCode());
 		result = prime * result + ((orderStatus == null) ? 0 : orderStatus.hashCode());
 		result = prime * result + ((paymentMethod == null) ? 0 : paymentMethod.hashCode());
+		result = prime * result + ((statusHistories == null) ? 0 : statusHistories.hashCode());
 		result = prime * result + (int) (totalPrice ^ (totalPrice >>> 32));
 		return result;
 	}
@@ -145,6 +149,8 @@ public class OrderDto {
 				return false;
 		} else if (!dateTimeModified.equals(other.dateTimeModified))
 			return false;
+		if (hasStockIssues != other.hasStockIssues)
+			return false;
 		if (id != other.id)
 			return false;
 		if (modifiedBy == null) {
@@ -163,6 +169,11 @@ public class OrderDto {
 			if (other.paymentMethod != null)
 				return false;
 		} else if (!paymentMethod.equals(other.paymentMethod))
+			return false;
+		if (statusHistories == null) {
+			if (other.statusHistories != null)
+				return false;
+		} else if (!statusHistories.equals(other.statusHistories))
 			return false;
 		if (totalPrice != other.totalPrice)
 			return false;

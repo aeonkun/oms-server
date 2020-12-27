@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ohwow.oms.inventory.exception.InventoryException;
 import com.ohwow.oms.producthistory.domain.ProductHistory;
 import com.ohwow.oms.producthistory.service.ProductHistoryService;
 import com.ohwow.oms.products.dto.ProductAndInventoryDto;
@@ -32,7 +33,7 @@ public class ProductsController {
 	ProductHistoryService productHistoryService;
 
 	@GetMapping("/products")
-	public List<ProductAndInventoryDto> getAllProducts() {
+	public List<ProductAndInventoryDto> getAllProducts() throws InventoryException {
 
 		return productService.getProducts();
 	}
@@ -48,12 +49,12 @@ public class ProductsController {
 	}
 
 	@GetMapping("/products/{id}")
-	public ProductDto getProductById(@PathVariable long id) throws ProductException {
-		return productService.getProductById(id);
+	public ProductDto getProductAndInventoryById(@PathVariable long id) throws ProductException, InventoryException {
+		return productService.getProductAndInventoryById(id);
 	}
 
 	@PutMapping("/products/{id}")
-	public boolean updateProduct(@PathVariable long id, @RequestBody ProductDto product) {
+	public boolean updateProduct(@PathVariable long id, @RequestBody ProductDto product) throws InventoryException {
 		return productService.updateProduct(id, product);
 	}
 
@@ -63,7 +64,7 @@ public class ProductsController {
 	}
 
 	@GetMapping("/products/{id}/transactions")
-	public List<ProductTransactionDto> getAllTransactionByProductId(@PathVariable long id) {
+	public List<ProductTransactionDto> getAllTransactionByProductId(@PathVariable long id) throws ProductException {
 		return productService.getAllTransactionByProductId(id);
 	}
 }

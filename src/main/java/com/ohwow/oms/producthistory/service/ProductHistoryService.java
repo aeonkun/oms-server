@@ -3,10 +3,10 @@ package com.ohwow.oms.producthistory.service;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import javax.transaction.Transactional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ohwow.oms.producthistory.dao.ProductHistoryRepository;
 import com.ohwow.oms.producthistory.domain.ProductHistory;
@@ -14,7 +14,7 @@ import com.ohwow.oms.products.domain.Product;
 import com.ohwow.oms.products.dto.ProductDto;
 
 @Service
-@Transactional
+@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 public class ProductHistoryService {
 
 	private static final String ITEM_NAME = "item name";

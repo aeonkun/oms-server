@@ -39,6 +39,7 @@ public class Order {
 	private String paymentMethod;
 	private String additionalNotes;
 	private LocalDateTime dateTimeCompleted;
+	private boolean hasStockIssues;
 
 	@Enumerated(EnumType.STRING)
 	private OrderStatusEnum orderStatus;
@@ -57,7 +58,7 @@ public class Order {
 
 	public Order(Customer customer, String createdBy, LocalDateTime dateTimeCreated, String modifiedBy,
 			LocalDateTime dateTimeModified, long totalPrice, OrderStatusEnum orderStatus, String additionalNotes,
-			String paymentMethod, LocalDateTime dateTimeCompleted) {
+			String paymentMethod, LocalDateTime dateTimeCompleted, boolean hasStockIssues) {
 		this.customer = customer;
 		this.createdBy = createdBy;
 		this.dateTimeCreated = dateTimeCreated;
@@ -68,6 +69,7 @@ public class Order {
 		this.additionalNotes = additionalNotes;
 		this.paymentMethod = paymentMethod;
 		this.dateTimeCompleted = dateTimeCompleted;
+		this.hasStockIssues = hasStockIssues;
 	}
 
 	public long getId() {
@@ -164,6 +166,22 @@ public class Order {
 
 	public void setDateTimeCompleted(LocalDateTime dateTimeCompleted) {
 		this.dateTimeCompleted = dateTimeCompleted;
+	}
+
+	public List<StatusHistory> getStatusHistories() {
+		return statusHistories;
+	}
+
+	public void setStatusHistories(List<StatusHistory> statusHistories) {
+		this.statusHistories = statusHistories;
+	}
+
+	public boolean hasStockIssues() {
+		return hasStockIssues;
+	}
+
+	public void setHasStockIssues(boolean hasStockIssues) {
+		this.hasStockIssues = hasStockIssues;
 	}
 
 }

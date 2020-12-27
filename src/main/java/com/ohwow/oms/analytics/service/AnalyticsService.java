@@ -4,16 +4,20 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.Year;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ohwow.oms.analytics.dto.OrderActivityDto;
+import com.ohwow.oms.analytics.dto.ProductSalesDto;
 import com.ohwow.oms.analytics.dto.SalesActivityDto;
 import com.ohwow.oms.analytics.dto.SalesActivitySummaryDto;
 import com.ohwow.oms.commons.exceptions.InvalidTimeUnitException;
@@ -22,12 +26,19 @@ import com.ohwow.oms.commons.timeunit.dto.StartDateAndEndDateDto;
 import com.ohwow.oms.order.OrderStatusEnum;
 import com.ohwow.oms.order.dao.OrderRepository;
 import com.ohwow.oms.order.domain.Order;
+import com.ohwow.oms.orderdetails.domain.OrderDetail;
+import com.ohwow.oms.products.dao.ProductRepository;
+import com.ohwow.oms.products.domain.Product;
 
 @Service
+@Transactional(readOnly = true)
 public class AnalyticsService {
 
 	@Autowired
 	OrderRepository orderRepository;
+
+	@Autowired
+	ProductRepository productRepository;
 
 	/**
 	 * Get the order activity based on the given time unit.
@@ -67,8 +78,6 @@ public class AnalyticsService {
 
 			List<LocalDate> dates = startDateAndEndDateDto.getStartDateTime().toLocalDate()
 					.datesUntil(startDateAndEndDateDto.getEndDateTime().toLocalDate()).collect(Collectors.toList());
-			System.out.println("startdate: " + startDateAndEndDateDto.getStartDateTime());
-			System.out.println("end date: " + startDateAndEndDateDto.getEndDateTime());
 
 			for (LocalDate date : dates) {
 				List<Order> orders = orderRepository.findAllByDateTimeCompletedBetween(
@@ -80,12 +89,60 @@ public class AnalyticsService {
 
 		} else if (TimeUnitEnum.ANNUALLY.equals(timeUnit)) {
 			List<LocalDate> dates = new ArrayList<>();
-			for (int i = 0; i < 12; i++) {
-				dates.add(LocalDate.of)
+
+			for (int i = 1; i <= 12; i++) {
+				dates.add(LocalDate.of(Year.now().getValue(), i, 1));
+			}
+
+			for (LocalDate date : dates) {
+				List<Order> orders = orderRepository.findAllByDateTimeCompletedBetween(
+						LocalDateTime.of(date, LocalTime.MIN),
+						LocalDateTime.of(date.plusDays(date.lengthOfMonth() - 1L), LocalTime.MAX));
+				long value = orders.stream().mapToLong(Order::getTotalPrice).sum();
+				salesActivityDtos.add(new SalesActivityDto(date.format(DateTimeFormatter.ofPattern("MMM")), value));
+				totalSales += value;
+
 			}
 		}
 
 		return new SalesActivitySummaryDto(salesActivityDtos, totalSales / 100);
+
+	}
+
+	public List<ProductSalesDto> getProductSalesByCompletedDate(TimeUnitEnum timeUnitEnum)
+			throws InvalidTimeUnitException {
+
+		StartDateAndEndDateDto startDateAndEndDateDto = getStartDateAndEndDate(timeUnitEnum);
+
+		List<Product> products = productRepository.findAll();
+
+		List<Order> orders = orderRepository.findAllByDateTimeCreatedBetween(startDateAndEndDateDto.getStartDateTime(),
+				startDateAndEndDateDto.getEndDateTime());
+
+		List<ProductSalesDto> productSales = new ArrayList<>();
+
+		for (Product product : products) {
+
+			int quantitySold = 0;
+
+			for (Order order : orders) {
+
+				List<OrderDetail> orderDetails = order.getOrdeDetails();
+
+				Optional<OrderDetail> matchingProduct = orderDetails.stream()
+						.filter(od -> od.getProduct().getId() == product.getId()).findFirst();
+
+				if (matchingProduct.isPresent()) {
+					quantitySold += matchingProduct.get().getQuantity();
+				}
+
+			}
+
+			ProductSalesDto productSalesDto = new ProductSalesDto(product.getItemName(), quantitySold);
+			productSales.add(productSalesDto);
+		}
+
+		return productSales;
 
 	}
 

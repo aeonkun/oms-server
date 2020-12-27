@@ -29,23 +29,26 @@ public class OrderDetail {
 	private Product product;
 	private int quantity;
 	private long total;
+	private boolean hasEnoughStock;
 
 	public OrderDetail() {
 		// default constructor
 	}
 
-	public OrderDetail(Order order, Product product, int quantity, long total) {
+	public OrderDetail(Order order, Product product, int quantity, long total, boolean hasEnoughStock) {
 		this.orderId = order;
 		this.product = product;
 		this.quantity = quantity;
 		this.total = total;
+		this.hasEnoughStock = hasEnoughStock;
 	}
 
-	public OrderDetail(Order order, OrderDetailDto orderDetailDto, Product product) {
+	public OrderDetail(Order order, OrderDetailDto orderDetailDto, Product product, boolean hasEnoughStock) {
 		this.orderId = order;
 		this.product = product;
 		this.quantity = orderDetailDto.getQuantity();
 		this.total = orderDetailDto.getTotal();
+		this.hasEnoughStock = hasEnoughStock;
 	}
 
 	public long getId() {
@@ -86,6 +89,14 @@ public class OrderDetail {
 
 	public void setTotal(long total) {
 		this.total = total;
+	}
+
+	public boolean hasEnoughStock() {
+		return hasEnoughStock;
+	}
+
+	public void setHasEnoughStock(boolean hasEnoughStock) {
+		this.hasEnoughStock = hasEnoughStock;
 	}
 
 }

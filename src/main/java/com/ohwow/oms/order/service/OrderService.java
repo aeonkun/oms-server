@@ -11,6 +11,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 import com.ohwow.oms.customer.domain.Customer;
@@ -23,6 +25,7 @@ import com.ohwow.oms.order.dao.OrderRepository;
 import com.ohwow.oms.order.domain.Order;
 import com.ohwow.oms.order.dto.OrderDto;
 import com.ohwow.oms.order.dto.OrderResponseDto;
+import com.ohwow.oms.order.dto.UpdateOrderStatusDto;
 import com.ohwow.oms.order.exception.OrderException;
 import com.ohwow.oms.orderdetails.dao.OrderDetailRepository;
 import com.ohwow.oms.orderdetails.domain.OrderDetail;
@@ -30,9 +33,11 @@ import com.ohwow.oms.orderdetails.dto.OrderDetailDto;
 import com.ohwow.oms.products.dao.ProductRepository;
 import com.ohwow.oms.products.domain.Product;
 import com.ohwow.oms.products.exception.ProductException;
+import com.ohwow.oms.statushistory.dto.StatusHistoryDto;
 import com.ohwow.oms.statushistory.service.StatusHistoryService;
 
 @Service
+@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 public class OrderService {
 
 	@Autowired
@@ -54,11 +59,11 @@ public class OrderService {
 	StatusHistoryService statusHistoryService;
 
 	/**
-	 * Get all orders *test*
+	 * Get all orders
 	 * 
 	 * @return all Orders
 	 */
-	public OrderResponseDto getAllOrdersTest(int page, int rows) {
+	public OrderResponseDto getAllOrders(int page, int rows) {
 
 		Pageable pageable = PageRequest.of(page, rows);
 		Page<Order> orders = orderRepository.findAllByOrderByIdDesc(pageable);
@@ -69,15 +74,18 @@ public class OrderService {
 			for (OrderDetail orderDetail : order.getOrdeDetails()) {
 				Product product = orderDetail.getProduct();
 				orderDetails.add(new OrderDetailDto(product.getId(), product.getItemName(), orderDetail.getQuantity(),
-						orderDetail.getProduct().getPrice(), orderDetail.getTotal()));
+						orderDetail.getProduct().getPrice(), orderDetail.getTotal(), orderDetail.hasEnoughStock()));
 			}
 			OrderDto orderDto = new OrderDto(order.getId(), new CustomerDto(order.getCustomer()), order.getCreatedBy(),
 					order.getDateTimeCreated(), order.getModifiedBy(), order.getDateTimeModified(),
-					order.getTotalPrice(), order.getOrderStatus(), orderDetails, order.getPaymentMethod(),
-					order.getAdditionalNotes());
+					order.getTotalPrice(), order.getOrderStatus(), orderDetails, null, order.getPaymentMethod(),
+					order.getAdditionalNotes(), order.hasStockIssues());
 			orderDtos.add(orderDto);
 		}
 
+		for (OrderDto orderqqq : orderDtos) {
+			System.out.println(orderqqq.getOrderDetails().toString());
+		}
 		return new OrderResponseDto(orders.getTotalPages(), orderDtos);
 	}
 
@@ -110,7 +118,7 @@ public class OrderService {
 	 * @throws InventoryException
 	 * @throws ProductException
 	 */
-	public boolean updateOrderStatus(long id, OrderStatusEnum orderStatus, String user)
+	public boolean updateOrderStatus(long id, UpdateOrderStatusDto updateOrderStatus)
 			throws InventoryException, ProductException {
 
 		boolean isSuccessful = false;
@@ -119,19 +127,25 @@ public class OrderService {
 
 		if (orderResult.isPresent()) {
 			Order order = orderResult.get();
-			if (orderStatus.equals(OrderStatusEnum.CANCELLED)) {
+			if (updateOrderStatus.getOrderStatus().equals(OrderStatusEnum.CANCELLED)) {
 				for (OrderDetail orderDetail : order.getOrdeDetails()) {
 					inventoryService.returnCommittedStock(orderDetail.getProduct().getId(), orderDetail.getQuantity());
 				}
-			} else if (orderStatus.equals(OrderStatusEnum.COMPLETED)) {
+			} else if (updateOrderStatus.getOrderStatus().equals(OrderStatusEnum.COMPLETED)) {
 				for (OrderDetail orderDetail : order.getOrdeDetails()) {
-					inventoryService.deductFromStockOnHand(orderDetail.getProduct().getId(), orderDetail.getQuantity());
-					order.setDateTimeCompleted(LocalDateTime.now());
+					inventoryService.deductFromStockOnHand(orderDetail.getProduct().getParentId(),
+							orderDetail.getQuantity());
+					orderDetail.setHasEnoughStock(true);
+					orderDetailRepository.save(orderDetail);
 				}
+
+				order.setDateTimeCompleted(LocalDateTime.now());
+				order.setHasStockIssues(false);
 			}
 
-			statusHistoryService.updateStatusAndHistory(order, orderStatus, user);
-			order.setOrderStatus(orderStatus);
+			statusHistoryService.updateStatusAndHistory(order, updateOrderStatus.getOrderStatus(),
+					updateOrderStatus.getUsername());
+			order.setOrderStatus(updateOrderStatus.getOrderStatus());
 			orderRepository.save(order);
 			isSuccessful = true;
 		} else
@@ -154,10 +168,14 @@ public class OrderService {
 			List<OrderDetailDto> orderDetails = order.getOrdeDetails().stream().map(OrderDetailDto::new)
 					.collect(Collectors.toList());
 
+			List<StatusHistoryDto> statusHistories = order.getStatusHistories().stream().map(StatusHistoryDto::new)
+					.collect(Collectors.toList());
+
 			return new OrderDto(order.getId(), new CustomerDto(order.getCustomer()), order.getCreatedBy(),
 					order.getDateTimeCreated(), order.getModifiedBy(), order.getDateTimeModified(),
-					order.getTotalPrice(), order.getOrderStatus(), orderDetails, order.getPaymentMethod(),
-					order.getAdditionalNotes());
+					order.getTotalPrice(), order.getOrderStatus(), orderDetails, statusHistories,
+					order.getPaymentMethod(), order.getAdditionalNotes(), order.hasStockIssues());
+
 		} else
 			throw new OrderException(OrderException.ORDER_NOT_FOUND_EXCEPTION);
 	}
@@ -190,10 +208,11 @@ public class OrderService {
 
 		// save customer details
 		Customer customer = customerService.createCustomer(orderDto.getCustomer());
+		boolean hasStockIssues = false;
 
 		Order order = orderRepository.saveAndFlush(new Order(customer, orderDto.getCreatedBy(), LocalDateTime.now(),
-				null, null, computeTotal(orderDto.getOrderDetails()), OrderStatusEnum.ORDER_PLACED,
-				orderDto.getAdditionalNotes(), orderDto.getPaymentMethod(), null));
+				null, null, computeTotal(orderDto.getOrderDetails()), OrderStatusEnum.NEW,
+				orderDto.getAdditionalNotes(), orderDto.getPaymentMethod(), null, hasStockIssues));
 
 		if (!ObjectUtils.isEmpty(customer) && !ObjectUtils.isEmpty(order)) {
 
@@ -208,12 +227,15 @@ public class OrderService {
 					orderDetail.setProduct(product);
 					orderDetail.setQuantity(orderDetailDto.getQuantity());
 					orderDetail.setTotal(product.getPrice() * orderDetailDto.getQuantity());
-					inventoryService.commitStock(product.getId(), orderDetailDto.getQuantity());
-					orderDetailRepository.save(orderDetail);
+					inventoryService.commitStock(product.getParentId(), orderDetailDto.getQuantity());
+
+					orderDetailRepository.saveAndFlush(orderDetail);
 				} else
 					throw new ProductException(ProductException.PRODUCT_NOT_FOUND_EXCEPTION);
 
 			}
+			inventoryService.evaluateAndUpdateInventoryIssuesForAllNewOrders();
+
 			return order.getId();
 
 		} else
@@ -236,4 +258,5 @@ public class OrderService {
 
 		return totalPrice;
 	}
+
 }

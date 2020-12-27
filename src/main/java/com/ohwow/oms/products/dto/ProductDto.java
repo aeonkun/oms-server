@@ -2,20 +2,25 @@ package com.ohwow.oms.products.dto;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ohwow.oms.products.domain.Product;
 
 public class ProductDto {
-	private long id;
-	private String itemName;
-	private long price;
-	private int stockOnHand;
-	private String createdBy;
-	private LocalDateTime dateTimeCreated;
-	private String modifiedBy;
-	private LocalDateTime dateTimeModified;
+	private final long id;
+	private final String itemName;
+	private final long price;
+	private final int stockOnHand;
+	private final String createdBy;
+	private final LocalDateTime dateTimeCreated;
+	private final String modifiedBy;
+	private final LocalDateTime dateTimeModified;
 
-	public ProductDto(long id, String itemName, long price, String createdBy, int stockOnHand,
-			LocalDateTime dateTimeCreated, String modifiedBy, LocalDateTime dateTimeModified) {
+	@JsonCreator
+	public ProductDto(@JsonProperty("id") long id, @JsonProperty("itemName") String itemName,
+			@JsonProperty("price") long price, @JsonProperty("createdBy") String createdBy,
+			@JsonProperty("stockOnHand") int stockOnHand, LocalDateTime dateTimeCreated, String modifiedBy,
+			@JsonProperty("dateTimeModified") LocalDateTime dateTimeModified) {
 		this.id = id;
 		this.itemName = itemName;
 		this.price = price;
@@ -26,7 +31,7 @@ public class ProductDto {
 		this.dateTimeModified = dateTimeModified;
 	}
 
-	public ProductDto(Product product) {
+	public ProductDto(Product product, int stockOnHand) {
 		this.id = product.getId();
 		this.itemName = product.getItemName();
 		this.price = product.getPrice();
@@ -34,70 +39,40 @@ public class ProductDto {
 		this.dateTimeCreated = product.getDateTimeCreated();
 		this.modifiedBy = product.getModifiedBy();
 		this.dateTimeModified = product.getDateTimeModified();
+		this.stockOnHand = stockOnHand;
+
 	}
 
 	public long getId() {
 		return id;
 	}
 
-	public void setId(long id) {
-		this.id = id;
-	}
-
 	public String getItemName() {
 		return itemName;
-	}
-
-	public void setItemName(String itemName) {
-		this.itemName = itemName;
 	}
 
 	public long getPrice() {
 		return price;
 	}
 
-	public void setPrice(long price) {
-		this.price = price;
-	}
-
 	public int getStockOnHand() {
 		return stockOnHand;
-	}
-
-	public void setStockOnHand(int stockOnHand) {
-		this.stockOnHand = stockOnHand;
 	}
 
 	public String getCreatedBy() {
 		return createdBy;
 	}
 
-	public void setCreatedBy(String createdBy) {
-		this.createdBy = createdBy;
-	}
-
 	public LocalDateTime getDateTimeCreated() {
 		return dateTimeCreated;
-	}
-
-	public void setDateTimeCreated(LocalDateTime dateTimeCreated) {
-		this.dateTimeCreated = dateTimeCreated;
 	}
 
 	public String getModifiedBy() {
 		return modifiedBy;
 	}
 
-	public void setModifiedBy(String modifiedBy) {
-		this.modifiedBy = modifiedBy;
-	}
-
 	public LocalDateTime getDateTimeModified() {
 		return dateTimeModified;
-	}
-
-	public void setDateTimeModified(LocalDateTime dateTimeModified) {
-		this.dateTimeModified = dateTimeModified;
 	}
 
 	@Override

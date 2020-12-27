@@ -1,6 +1,7 @@
 package com.ohwow.oms.products.dao;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,6 +15,8 @@ import com.ohwow.oms.products.dto.ProductTransactionDto;
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
 	List<Product> findAllByOrderByIdDesc();
+
+	Optional<Product> findByParentId(long parentId);
 
 	@Query(value = "SELECT new com.ohwow.oms.products.dto.ProductAndInventoryDto(p.id, p.itemName, p.price, i.stockOnHand, i.committedStock, i.availableStock) FROM Product p INNER JOIN Inventory i ON i.productId = p.id")
 	List<ProductAndInventoryDto> findAllProductWithInventory();
