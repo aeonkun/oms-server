@@ -40,6 +40,8 @@ public class Order {
 	private String additionalNotes;
 	private LocalDateTime dateTimeCompleted;
 	private boolean hasStockIssues;
+	private String municipality;
+	private long deliveryCharge;
 
 	@Enumerated(EnumType.STRING)
 	private OrderStatusEnum orderStatus;
@@ -58,7 +60,8 @@ public class Order {
 
 	public Order(Customer customer, String createdBy, LocalDateTime dateTimeCreated, String modifiedBy,
 			LocalDateTime dateTimeModified, long totalPrice, OrderStatusEnum orderStatus, String additionalNotes,
-			String paymentMethod, LocalDateTime dateTimeCompleted, boolean hasStockIssues) {
+			String paymentMethod, LocalDateTime dateTimeCompleted, boolean hasStockIssues, String municipality,
+			long deliveryCharge) {
 		this.customer = customer;
 		this.createdBy = createdBy;
 		this.dateTimeCreated = dateTimeCreated;
@@ -70,6 +73,8 @@ public class Order {
 		this.paymentMethod = paymentMethod;
 		this.dateTimeCompleted = dateTimeCompleted;
 		this.hasStockIssues = hasStockIssues;
+		this.municipality = municipality;
+		this.deliveryCharge = deliveryCharge;
 	}
 
 	public long getId() {
@@ -182,6 +187,26 @@ public class Order {
 
 	public void setHasStockIssues(boolean hasStockIssues) {
 		this.hasStockIssues = hasStockIssues;
+	}
+
+	public String getMunicipality() {
+		return municipality;
+	}
+
+	public void setMunicipality(String municipality) {
+		this.municipality = municipality;
+	}
+
+	public long getDeliveryCharge() {
+		return deliveryCharge;
+	}
+
+	public void setDeliveryCharge(long deliveryCharge) {
+		this.deliveryCharge = deliveryCharge;
+	}
+
+	public boolean isHasStockIssues() {
+		return hasStockIssues;
 	}
 
 }

@@ -79,7 +79,8 @@ public class OrderService {
 			OrderDto orderDto = new OrderDto(order.getId(), new CustomerDto(order.getCustomer()), order.getCreatedBy(),
 					order.getDateTimeCreated(), order.getModifiedBy(), order.getDateTimeModified(),
 					order.getTotalPrice(), order.getOrderStatus(), orderDetails, null, order.getPaymentMethod(),
-					order.getAdditionalNotes(), order.hasStockIssues());
+					order.getAdditionalNotes(), order.hasStockIssues(), order.getMunicipality(),
+					order.getDeliveryCharge());
 			orderDtos.add(orderDto);
 		}
 
@@ -174,7 +175,8 @@ public class OrderService {
 			return new OrderDto(order.getId(), new CustomerDto(order.getCustomer()), order.getCreatedBy(),
 					order.getDateTimeCreated(), order.getModifiedBy(), order.getDateTimeModified(),
 					order.getTotalPrice(), order.getOrderStatus(), orderDetails, statusHistories,
-					order.getPaymentMethod(), order.getAdditionalNotes(), order.hasStockIssues());
+					order.getPaymentMethod(), order.getAdditionalNotes(), order.hasStockIssues(),
+					order.getMunicipality(), order.getDeliveryCharge());
 
 		} else
 			throw new OrderException(OrderException.ORDER_NOT_FOUND_EXCEPTION);
@@ -207,12 +209,15 @@ public class OrderService {
 	public long createOrder(OrderDto orderDto) throws ProductException, OrderException, InventoryException {
 
 		// save customer details
+		System.out.println("municipality: " + orderDto.getMunicipality());
+		System.out.println("charge " + orderDto.getDeliveryCharge());
 		Customer customer = customerService.createCustomer(orderDto.getCustomer());
 		boolean hasStockIssues = false;
 
 		Order order = orderRepository.saveAndFlush(new Order(customer, orderDto.getCreatedBy(), LocalDateTime.now(),
-				null, null, computeTotal(orderDto.getOrderDetails()), OrderStatusEnum.NEW,
-				orderDto.getAdditionalNotes(), orderDto.getPaymentMethod(), null, hasStockIssues));
+				null, null, computeTotal(orderDto.getOrderDetails(), orderDto.getDeliveryCharge()), OrderStatusEnum.NEW,
+				orderDto.getAdditionalNotes(), orderDto.getPaymentMethod(), null, hasStockIssues,
+				orderDto.getMunicipality(), orderDto.getDeliveryCharge()));
 
 		if (!ObjectUtils.isEmpty(customer) && !ObjectUtils.isEmpty(order)) {
 
@@ -248,7 +253,7 @@ public class OrderService {
 	 * @param orderDetails
 	 * @return
 	 */
-	public long computeTotal(List<OrderDetailDto> orderDetails) {
+	public long computeTotal(List<OrderDetailDto> orderDetails, long deliveryCharge) {
 
 		long totalPrice = 0;
 
@@ -256,7 +261,7 @@ public class OrderService {
 			totalPrice = totalPrice + (orderDetail.getPrice() * orderDetail.getQuantity());
 		}
 
-		return totalPrice;
+		return totalPrice + deliveryCharge;
 	}
 
 }

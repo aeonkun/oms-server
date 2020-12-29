@@ -23,11 +23,13 @@ public class OrderDto {
 	private final String paymentMethod;
 	private final String additionalNotes;
 	private final boolean hasStockIssues;
+	private final String municipality;
+	private final long deliveryCharge;
 
 	public OrderDto(long id, CustomerDto customer, String createdBy, LocalDateTime dateTimeCreated, String modifiedBy,
 			LocalDateTime dateTimeModified, long totalPrice, OrderStatusEnum orderStatus,
 			List<OrderDetailDto> orderDetails, List<StatusHistoryDto> statusHistories, String paymentMethod,
-			String additionalNotes, boolean hasStockIssues) {
+			String additionalNotes, boolean hasStockIssues, String municipality, long deliveryCharge) {
 		this.id = id;
 		this.customer = customer;
 		this.createdBy = createdBy;
@@ -41,6 +43,8 @@ public class OrderDto {
 		this.paymentMethod = paymentMethod;
 		this.additionalNotes = additionalNotes;
 		this.hasStockIssues = hasStockIssues;
+		this.municipality = municipality;
+		this.deliveryCharge = deliveryCharge;
 	}
 
 	public long getId() {
@@ -95,6 +99,14 @@ public class OrderDto {
 		return hasStockIssues;
 	}
 
+	public String getMunicipality() {
+		return municipality;
+	}
+
+	public long getDeliveryCharge() {
+		return deliveryCharge;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -104,9 +116,11 @@ public class OrderDto {
 		result = prime * result + ((customer == null) ? 0 : customer.hashCode());
 		result = prime * result + ((dateTimeCreated == null) ? 0 : dateTimeCreated.hashCode());
 		result = prime * result + ((dateTimeModified == null) ? 0 : dateTimeModified.hashCode());
+		result = prime * result + (int) (deliveryCharge ^ (deliveryCharge >>> 32));
 		result = prime * result + (hasStockIssues ? 1231 : 1237);
 		result = prime * result + (int) (id ^ (id >>> 32));
 		result = prime * result + ((modifiedBy == null) ? 0 : modifiedBy.hashCode());
+		result = prime * result + ((municipality == null) ? 0 : municipality.hashCode());
 		result = prime * result + ((orderDetails == null) ? 0 : orderDetails.hashCode());
 		result = prime * result + ((orderStatus == null) ? 0 : orderStatus.hashCode());
 		result = prime * result + ((paymentMethod == null) ? 0 : paymentMethod.hashCode());
@@ -149,6 +163,8 @@ public class OrderDto {
 				return false;
 		} else if (!dateTimeModified.equals(other.dateTimeModified))
 			return false;
+		if (deliveryCharge != other.deliveryCharge)
+			return false;
 		if (hasStockIssues != other.hasStockIssues)
 			return false;
 		if (id != other.id)
@@ -157,6 +173,11 @@ public class OrderDto {
 			if (other.modifiedBy != null)
 				return false;
 		} else if (!modifiedBy.equals(other.modifiedBy))
+			return false;
+		if (municipality == null) {
+			if (other.municipality != null)
+				return false;
+		} else if (!municipality.equals(other.municipality))
 			return false;
 		if (orderDetails == null) {
 			if (other.orderDetails != null)
