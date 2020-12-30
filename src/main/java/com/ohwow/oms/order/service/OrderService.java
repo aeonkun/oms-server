@@ -209,15 +209,14 @@ public class OrderService {
 	public long createOrder(OrderDto orderDto) throws ProductException, OrderException, InventoryException {
 
 		// save customer details
-		System.out.println("municipality: " + orderDto.getMunicipality());
-		System.out.println("charge " + orderDto.getDeliveryCharge());
 		Customer customer = customerService.createCustomer(orderDto.getCustomer());
 		boolean hasStockIssues = false;
 
-		Order order = orderRepository.saveAndFlush(new Order(customer, orderDto.getCreatedBy(), LocalDateTime.now(),
-				null, null, computeTotal(orderDto.getOrderDetails(), orderDto.getDeliveryCharge()), OrderStatusEnum.NEW,
-				orderDto.getAdditionalNotes(), orderDto.getPaymentMethod(), null, hasStockIssues,
-				orderDto.getMunicipality(), orderDto.getDeliveryCharge()));
+		Order order = orderRepository
+				.saveAndFlush(new Order(customer, orderDto.getCreatedBy(), orderDto.getDateTimeCreated(), null, null,
+						computeTotal(orderDto.getOrderDetails(), orderDto.getDeliveryCharge()), OrderStatusEnum.NEW,
+						orderDto.getAdditionalNotes(), orderDto.getPaymentMethod(), null, hasStockIssues,
+						orderDto.getMunicipality(), orderDto.getDeliveryCharge()));
 
 		if (!ObjectUtils.isEmpty(customer) && !ObjectUtils.isEmpty(order)) {
 
