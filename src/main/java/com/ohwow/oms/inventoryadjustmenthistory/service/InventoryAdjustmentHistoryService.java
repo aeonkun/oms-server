@@ -24,7 +24,6 @@ public class InventoryAdjustmentHistoryService {
 	InventoryAdjustmentHistoryRepository inventoryAdjustmentHistoryRepository;
 
 	public boolean addInventoryAdjustmentEntry(long productId, InventoryAdjustmentDto inventoryAdjustmentDto) {
-		System.out.println("id: " + inventoryAdjustmentDto.getProduct().getId());
 		InventoryAdjustmentHistory inventoryAdjustmentHistory = new InventoryAdjustmentHistory(inventoryAdjustmentDto);
 		inventoryAdjustmentHistory.setDateTimeAdjusted(LocalDateTime.now());
 		if (ObjectUtils.isEmpty(inventoryAdjustmentHistoryRepository.saveAndFlush(inventoryAdjustmentHistory)))

@@ -1,10 +1,17 @@
 package com.ohwow.oms.analytics.dto;
 
+import java.time.Month;
+
 public class SalesActivityDto {
 
 	private final String dateUnit;
 
 	private final double value;
+
+	public SalesActivityDto(int dateUnit, long value) {
+		this.dateUnit = Month.of(dateUnit).name();
+		this.value = value / 100;
+	}
 
 	public SalesActivityDto(String dateUnit, double value) {
 		this.dateUnit = dateUnit;

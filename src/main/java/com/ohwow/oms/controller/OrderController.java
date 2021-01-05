@@ -47,9 +47,6 @@ public class OrderController {
 	@PutMapping("/{id}/status")
 	public boolean updateOrderStatus(@PathVariable long id, @RequestBody UpdateOrderStatusDto updateOrderStatus)
 			throws InventoryException, ProductException {
-		System.out.println("update");
-		System.out.println(updateOrderStatus.getUsername());
-		System.out.println(updateOrderStatus.getOrderStatus());
 
 		return orderService.updateOrderStatus(id, updateOrderStatus);
 	}

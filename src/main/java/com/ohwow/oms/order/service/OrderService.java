@@ -84,9 +84,6 @@ public class OrderService {
 			orderDtos.add(orderDto);
 		}
 
-		for (OrderDto orderqqq : orderDtos) {
-			System.out.println(orderqqq.getOrderDetails().toString());
-		}
 		return new OrderResponseDto(orders.getTotalPages(), orderDtos);
 	}
 

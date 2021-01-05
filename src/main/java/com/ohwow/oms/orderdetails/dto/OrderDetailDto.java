@@ -96,10 +96,4 @@ public class OrderDetailDto {
 		return true;
 	}
 
-	@Override
-	public String toString() {
-		return "OrderDetailDto [productId=" + productId + ", productName=" + productName + ", quantity=" + quantity
-				+ ", price=" + price + ", total=" + total + ", hasEnoughStock=" + hasEnoughStock + "]";
-	}
-
 }

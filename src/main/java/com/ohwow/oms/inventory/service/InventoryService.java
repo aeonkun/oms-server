@@ -136,17 +136,7 @@ public class InventoryService {
 			boolean hasStockIssues = false;
 			List<OrderDetail> orderDetails = orderDetailService.getOrderDetailByOrderId(order);
 
-			System.out.println("order details");
-
 			for (OrderDetail orderDetail : orderDetails) {
-				System.out.println("product id: " + orderDetail.getProduct().getId());
-				System.out.println("parent: " + orderDetail.getProduct().getParentId());
-			}
-
-			for (OrderDetail orderDetail : orderDetails) {
-
-				System.out.println("id: " + orderDetail.getProduct().getId() + " parent id: "
-						+ orderDetail.getProduct().getParentId());
 
 				boolean isInventoryEnough = checkIfInventoryIsEnough(orderDetail.getProduct().getParentId());
 				orderDetail.setHasEnoughStock(isInventoryEnough);

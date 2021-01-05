@@ -4,7 +4,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.Year;
+import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
@@ -68,6 +68,8 @@ public class AnalyticsService {
 	public SalesActivitySummaryDto getSalesActivitySummaryByDateRange(TimeUnitEnum timeUnit)
 			throws InvalidTimeUnitException {
 
+		// NOTE: DAILY time unit should show weekly data in the graph instead of only
+		// one date
 		timeUnit = TimeUnitEnum.DAILY.equals(timeUnit) ? TimeUnitEnum.WEEKLY : timeUnit;
 
 		StartDateAndEndDateDto startDateAndEndDateDto = getStartDateAndEndDate(timeUnit);
@@ -88,24 +90,23 @@ public class AnalyticsService {
 			}
 
 		} else if (TimeUnitEnum.ANNUALLY.equals(timeUnit)) {
-			List<LocalDate> dates = new ArrayList<>();
+			int year = LocalDate.now().getYear();
+
+			salesActivityDtos = orderRepository.findAllCompletedOrdersPerMonthByYear(year);
+			totalSales = salesActivityDtos.stream().mapToDouble(SalesActivityDto::getValue).sum();
 
 			for (int i = 1; i <= 12; i++) {
-				dates.add(LocalDate.of(Year.now().getValue(), i, 1));
+				String monthString = Month.of(i).name();
+
+				// insert month with zero value if absent in the data result
+				if (!salesActivityDtos.stream().anyMatch(data -> monthString.equals(data.getDateUnit()))) {
+					salesActivityDtos.add(i - 1, new SalesActivityDto(i, 0));
+				}
 			}
 
-			for (LocalDate date : dates) {
-				List<Order> orders = orderRepository.findAllByDateTimeCompletedBetween(
-						LocalDateTime.of(date, LocalTime.MIN),
-						LocalDateTime.of(date.plusDays(date.lengthOfMonth() - 1L), LocalTime.MAX));
-				long value = orders.stream().mapToLong(Order::getTotalPrice).sum();
-				salesActivityDtos.add(new SalesActivityDto(date.format(DateTimeFormatter.ofPattern("MMM")), value));
-				totalSales += value;
-
-			}
 		}
 
-		return new SalesActivitySummaryDto(salesActivityDtos, totalSales / 100);
+		return new SalesActivitySummaryDto(salesActivityDtos, totalSales);
 
 	}
 
@@ -179,6 +180,7 @@ public class AnalyticsService {
 					LocalTime.MIN);
 			dateTimeCreatedEnd = LocalDateTime.of(LocalDate.now().with(TemporalAdjusters.lastDayOfYear()),
 					LocalTime.MAX);
+
 			break;
 
 		default:
