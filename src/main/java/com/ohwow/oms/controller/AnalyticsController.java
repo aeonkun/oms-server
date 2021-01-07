@@ -1,8 +1,10 @@
 package com.ohwow.oms.controller;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,9 +27,11 @@ public class AnalyticsController {
 	AnalyticsService analyticsService;
 
 	@GetMapping("/orderactivity")
-	public List<OrderActivityDto> getOrderActivity(@RequestParam TimeUnitEnum timeUnit)
-			throws InvalidTimeUnitException {
-		return analyticsService.getOrderActivityByDateRange(timeUnit);
+	public List<OrderActivityDto> getOrderActivity(
+			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+
+		return analyticsService.getOrderActivityByDateRange(startDate, endDate);
 	}
 
 	@GetMapping("/salesactivity")
@@ -37,7 +41,9 @@ public class AnalyticsController {
 	}
 
 	@GetMapping("/productsales")
-	public List<ProductSalesDto> getProductSales(@RequestParam TimeUnitEnum timeUnit) throws InvalidTimeUnitException {
-		return analyticsService.getProductSalesByCompletedDate(timeUnit);
+	public List<ProductSalesDto> getProductSales(
+			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+		return analyticsService.getProductSalesByCompletedDate(startDate, endDate);
 	}
 }

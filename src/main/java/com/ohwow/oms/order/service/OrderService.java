@@ -125,31 +125,65 @@ public class OrderService {
 
 		if (orderResult.isPresent()) {
 			Order order = orderResult.get();
-			if (updateOrderStatus.getOrderStatus().equals(OrderStatusEnum.CANCELLED)) {
-				for (OrderDetail orderDetail : order.getOrdeDetails()) {
-					inventoryService.returnCommittedStock(orderDetail.getProduct().getId(), orderDetail.getQuantity());
-				}
-			} else if (updateOrderStatus.getOrderStatus().equals(OrderStatusEnum.COMPLETED)) {
+			if (validateOrderStatusAndUpdateInventory(order, updateOrderStatus)) {
+				commitOrderStatusUpdate(updateOrderStatus, order);
+				isSuccessful = true;
+			}
+		} else
+			throw new ProductException(ProductException.PRODUCT_NOT_FOUND_EXCEPTION);
+
+		return isSuccessful;
+	}
+
+	private boolean validateOrderStatusAndUpdateInventory(Order order, UpdateOrderStatusDto updateOrderStatus)
+			throws InventoryException {
+		boolean isValid = false;
+		OrderStatusEnum orderStatus = order.getOrderStatus();
+
+		switch (updateOrderStatus.getOrderStatus()) {
+
+		case CONFIRMED:
+			if (orderStatus.equals(OrderStatusEnum.NEW)) {
+				isValid = true;
+			}
+			break;
+		case COMPLETED:
+			if (orderStatus.equals(OrderStatusEnum.CONFIRMED)) {
 				for (OrderDetail orderDetail : order.getOrdeDetails()) {
 					inventoryService.deductFromStockOnHand(orderDetail.getProduct().getParentId(),
 							orderDetail.getQuantity());
 					orderDetail.setHasEnoughStock(true);
 					orderDetailRepository.save(orderDetail);
 				}
-
-				order.setDateTimeCompleted(LocalDateTime.now());
-				order.setHasStockIssues(false);
+				isValid = true;
 			}
+			break;
+		case CANCELLED:
+			if (orderStatus.equals(OrderStatusEnum.NEW) || orderStatus.equals(OrderStatusEnum.CONFIRMED)) {
+				for (OrderDetail orderDetail : order.getOrdeDetails()) {
+					inventoryService.returnCommittedStock(orderDetail.getProduct().getId(), orderDetail.getQuantity());
+				}
+				isValid = true;
+			}
+			break;
+		default:
+			break;
+		}
 
-			statusHistoryService.updateStatusAndHistory(order, updateOrderStatus.getOrderStatus(),
-					updateOrderStatus.getUsername());
-			order.setOrderStatus(updateOrderStatus.getOrderStatus());
-			orderRepository.save(order);
-			isSuccessful = true;
-		} else
-			throw new ProductException(ProductException.PRODUCT_NOT_FOUND_EXCEPTION);
+		return isValid;
+	}
 
-		return isSuccessful;
+	private void commitOrderStatusUpdate(UpdateOrderStatusDto updateOrderStatus, Order order) {
+
+		statusHistoryService.updateStatusAndHistory(order, updateOrderStatus.getOrderStatus(),
+				updateOrderStatus.getUsername());
+		order.setOrderStatus(updateOrderStatus.getOrderStatus());
+
+		if (updateOrderStatus.getOrderStatus().equals(OrderStatusEnum.COMPLETED)) {
+			order.setDateTimeCompleted(LocalDateTime.now());
+			order.setHasStockIssues(false);
+		}
+		orderRepository.save(order);
 	}
 
 	/**
