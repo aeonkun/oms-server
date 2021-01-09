@@ -153,7 +153,7 @@ public class ProductService {
 	 * @return boolean isSuccessful
 	 * @throws InventoryException
 	 */
-	public boolean updateProduct(long id, ProductDto productDto) throws InventoryException {
+	public boolean updateProduct(long id, ProductDto productDto) {
 
 		boolean isSuccessful = false;
 

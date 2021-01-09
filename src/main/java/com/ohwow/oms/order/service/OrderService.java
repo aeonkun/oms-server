@@ -161,7 +161,8 @@ public class OrderService {
 		case CANCELLED:
 			if (orderStatus.equals(OrderStatusEnum.NEW) || orderStatus.equals(OrderStatusEnum.CONFIRMED)) {
 				for (OrderDetail orderDetail : order.getOrdeDetails()) {
-					inventoryService.returnCommittedStock(orderDetail.getProduct().getId(), orderDetail.getQuantity());
+					inventoryService.returnCommittedStock(orderDetail.getProduct().getParentId(),
+							orderDetail.getQuantity());
 				}
 				isValid = true;
 			}

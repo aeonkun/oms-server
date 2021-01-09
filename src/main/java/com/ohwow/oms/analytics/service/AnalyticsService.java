@@ -20,7 +20,6 @@ import com.ohwow.oms.analytics.dto.OrderActivityDto;
 import com.ohwow.oms.analytics.dto.ProductSalesDto;
 import com.ohwow.oms.analytics.dto.ProductSalesProjection;
 import com.ohwow.oms.analytics.dto.SalesActivityDto;
-import com.ohwow.oms.analytics.dto.SalesActivitySummaryDto;
 import com.ohwow.oms.commons.exceptions.InvalidTimeUnitException;
 import com.ohwow.oms.commons.timeunit.TimeUnitEnum;
 import com.ohwow.oms.commons.timeunit.dto.StartDateAndEndDateDto;
@@ -62,46 +61,38 @@ public class AnalyticsService {
 		return orderActivityDtos;
 	}
 
-	public SalesActivitySummaryDto getSalesActivitySummaryByDateRange(TimeUnitEnum timeUnit)
+	public List<SalesActivityDto> getSalesActivitySummaryByDateRange(int month, int year)
 			throws InvalidTimeUnitException {
 
-		// NOTE: DAILY time unit should show weekly data in the graph instead of only
-		// one date
-		timeUnit = TimeUnitEnum.DAILY.equals(timeUnit) ? TimeUnitEnum.WEEKLY : timeUnit;
-
-		StartDateAndEndDateDto startDateAndEndDateDto = getStartDateAndEndDate(timeUnit);
 		List<SalesActivityDto> salesActivityDtos = new ArrayList<>();
-		double totalSales = 0;
 
-		if (TimeUnitEnum.ANNUALLY.equals(timeUnit)) {
-			int year = LocalDate.now().getYear();
+		if (year != 0 && month == 0) {
 
 			salesActivityDtos = orderRepository.findAllCompletedOrdersPerMonthByYear(year);
-			totalSales = salesActivityDtos.stream().mapToDouble(SalesActivityDto::getValue).sum();
 
 			for (int i = 1; i <= 12; i++) {
 				String monthString = Month.of(i).name();
 
 				// insert month with zero value if absent in the data result
-				if (!salesActivityDtos.stream().anyMatch(data -> monthString.equals(data.getDateUnit()))) {
+				if (salesActivityDtos.stream().noneMatch(data -> monthString.equals(data.getDateUnit()))) {
 					salesActivityDtos.add(i - 1, new SalesActivityDto(i, 0));
 				}
 			}
 
 		} else {
-			List<LocalDate> dates = startDateAndEndDateDto.getStartDateTime().toLocalDate()
-					.datesUntil(startDateAndEndDateDto.getEndDateTime().toLocalDate()).collect(Collectors.toList());
+			List<LocalDate> dates = LocalDate.of(year, month, 1)
+					.datesUntil(LocalDate.of(year, month, 1).with(TemporalAdjusters.lastDayOfMonth()))
+					.collect(Collectors.toList());
 
 			for (LocalDate date : dates) {
 				List<Order> orders = orderRepository.findAllByDateTimeCompletedBetween(
 						LocalDateTime.of(date, LocalTime.MIN), LocalDateTime.of(date, LocalTime.MAX));
 				long value = orders.stream().mapToLong(Order::getTotalPrice).sum();
 				salesActivityDtos.add(new SalesActivityDto(date.format(DateTimeFormatter.ofPattern("MM/dd")), value));
-				totalSales += value;
 			}
 		}
 
-		return new SalesActivitySummaryDto(salesActivityDtos, totalSales);
+		return salesActivityDtos;
 
 	}
 

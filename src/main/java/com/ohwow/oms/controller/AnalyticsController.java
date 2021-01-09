@@ -13,10 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ohwow.oms.analytics.dto.OrderActivityDto;
 import com.ohwow.oms.analytics.dto.ProductSalesDto;
-import com.ohwow.oms.analytics.dto.SalesActivitySummaryDto;
+import com.ohwow.oms.analytics.dto.SalesActivityDto;
 import com.ohwow.oms.analytics.service.AnalyticsService;
 import com.ohwow.oms.commons.exceptions.InvalidTimeUnitException;
-import com.ohwow.oms.commons.timeunit.TimeUnitEnum;
 
 @RestController
 @RequestMapping(path = "api/v1/analytics")
@@ -35,9 +34,9 @@ public class AnalyticsController {
 	}
 
 	@GetMapping("/salesactivity")
-	public SalesActivitySummaryDto getSalesActivitySummary(@RequestParam TimeUnitEnum timeUnit)
+	public List<SalesActivityDto> getSalesActivitySummary(@RequestParam int month, @RequestParam int year)
 			throws InvalidTimeUnitException {
-		return analyticsService.getSalesActivitySummaryByDateRange(timeUnit);
+		return analyticsService.getSalesActivitySummaryByDateRange(month, year);
 	}
 
 	@GetMapping("/productsales")

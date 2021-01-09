@@ -10,12 +10,12 @@ public class SalesActivityDto {
 
 	public SalesActivityDto(int dateUnit, long value) {
 		this.dateUnit = Month.of(dateUnit).name();
-		this.value = value / 100;
+		this.value = value;
 	}
 
 	public SalesActivityDto(String dateUnit, double value) {
 		this.dateUnit = dateUnit;
-		this.value = value / 100;
+		this.value = value;
 	}
 
 	public String getDateUnit() {
